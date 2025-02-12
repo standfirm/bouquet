@@ -222,7 +222,9 @@ class MainActivity : ComponentActivity() {
                 state = pdfState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = Color.Gray)
+                    .background(color = Color.Gray),
+                contentModifier = Modifier.padding(8.dp)
+
             )
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -296,7 +298,8 @@ class MainActivity : ComponentActivity() {
                 state = pdfState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = Color.Gray)
+                    .background(color = Color.Gray),
+                contentModifier = Modifier
             )
             Column(
                 modifier = Modifier.fillMaxWidth()

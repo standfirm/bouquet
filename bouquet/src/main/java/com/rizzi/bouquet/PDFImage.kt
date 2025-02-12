@@ -9,6 +9,7 @@ import androidx.compose.ui.layout.ContentScale
 
 @Composable
 internal fun PdfImage(
+    modifier: Modifier = Modifier,
     bitmap: () -> ImageBitmap,
     contentDescription: String = "",
 ) {
@@ -16,6 +17,6 @@ internal fun PdfImage(
         bitmap = bitmap(),
         contentDescription = contentDescription,
         contentScale = ContentScale.FillWidth,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     )
 }

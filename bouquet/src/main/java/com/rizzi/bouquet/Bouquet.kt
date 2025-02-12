@@ -42,7 +42,8 @@ import java.io.IOException
 @Composable
 fun VerticalPDFReader(
     state: VerticalPdfReaderState,
-    modifier: Modifier
+    modifier: Modifier,
+    contentModifier: Modifier = Modifier,
 ) {
     BoxWithConstraints(
         modifier = modifier,
@@ -83,6 +84,7 @@ fun VerticalPDFReader(
                     when (pageContent) {
                         is PageContentInt.PageContent -> {
                             PdfImage(
+                                modifier = contentModifier,
                                 bitmap = { pageContent.bitmap.asImageBitmap() },
                                 contentDescription = pageContent.contentDescription
                             )
@@ -109,7 +111,8 @@ fun Int.dp(): Dp {
 @Composable
 fun HorizontalPDFReader(
     state: HorizontalPdfReaderState,
-    modifier: Modifier
+    modifier: Modifier,
+    contentModifier: Modifier
 ) {
     BoxWithConstraints(
         modifier = modifier,
@@ -149,6 +152,7 @@ fun HorizontalPDFReader(
                 when (pageContent) {
                     is PageContentInt.PageContent -> {
                         PdfImage(
+                            modifier = contentModifier,
                             bitmap = { pageContent.bitmap.asImageBitmap() },
                             contentDescription = pageContent.contentDescription
                         )
