@@ -40,6 +40,10 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.2"
     }
+    lint{
+        //  Unexpected failure during lint analysis (this is a bug in lint or one of the libraries it depends on)
+        disable += "MutableCollectionMutableState"
+    }
 }
 
 dependencies {
