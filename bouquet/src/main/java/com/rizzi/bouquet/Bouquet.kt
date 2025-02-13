@@ -1,8 +1,13 @@
 package com.rizzi.bouquet
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.scrollBy
@@ -14,7 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -22,6 +31,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEvent
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -309,6 +320,7 @@ private fun load(
     }
 }
 
+@SuppressLint("ReturnFromAwaitPointerEventScope")
 fun Modifier.tapToZoomVertical(
     state: VerticalPdfReaderState,
     constraints: Constraints
@@ -320,6 +332,17 @@ fun Modifier.tapToZoomVertical(
 ) {
     val coroutineScope = rememberCoroutineScope()
     this
+        .pointerInput(PointerEventType.Move) {
+            awaitPointerEventScope {
+                while(true){
+                    val event = awaitPointerEvent()
+                    val zoom = event.calculateZoom()
+                    if(zoom != 1f){
+                        state.mScale = kotlin.math.max(state.mScale * zoom, 1f)
+                    }
+                }
+            }
+        }
         .pointerInput(Unit) {
             detectTapGestures(
                 onDoubleTap = { tapCenter ->
@@ -342,10 +365,6 @@ fun Modifier.tapToZoomVertical(
         }
         .pointerInput(Unit) {
             detectTransformGestures(true) { centroid, pan, zoom, rotation ->
-                // set zoom in / zoom out
-                // https://github.com/GRizzi91/bouquet/pull/50
-                state.mScale = kotlin.math.max(state.mScale * zoom, 1f)
-
                 val pair = if (pan.y > 0) {
                     if (state.lazyState.canScrollBackward) {
                         Pair(0f, pan.y)
@@ -389,6 +408,7 @@ fun Modifier.tapToZoomVertical(
         }
 }
 
+@SuppressLint("ReturnFromAwaitPointerEventScope")
 fun Modifier.tapToZoomHorizontal(
     state: HorizontalPdfReaderState,
     constraints: Constraints
@@ -398,8 +418,17 @@ fun Modifier.tapToZoomHorizontal(
         properties["state"] = state
     }
 ) {
-    this
-        .pointerInput(Unit) {
+    this.pointerInput(PointerEventType.Move) {
+            awaitPointerEventScope {
+                while(true){
+                    val event = awaitPointerEvent()
+                    val zoom = event.calculateZoom()
+                    if(zoom != 1f){
+                        state.mScale = kotlin.math.max(state.mScale * zoom, 1f)
+                    }
+                }
+            }
+        }.pointerInput(Unit) {
             detectTapGestures(
                 onDoubleTap = { tapCenter ->
                     if (!state.isZoomEnable) return@detectTapGestures
@@ -421,10 +450,6 @@ fun Modifier.tapToZoomHorizontal(
         }
         .pointerInput(Unit) {
             detectTransformGestures(true) { centroid, pan, zoom, rotation ->
-                // set zoom in / zoom out
-                // https://github.com/GRizzi91/bouquet/pull/50
-                state.mScale = kotlin.math.max(state.mScale * zoom, 1f)
-
                 val nOffset = if (state.scale > 1f) {
                     val maxT = (constraints.maxWidth * state.scale) - constraints.maxWidth
                     val maxY = (constraints.maxHeight * state.scale) - constraints.maxHeight
