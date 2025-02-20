@@ -80,9 +80,16 @@ fun VerticalPDFReader(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .tapToZoomVertical(state, constraints),
+                    .let {
+                        if(state.isZoomEnable){
+                            it.tapToZoomVertical(state, constraints)
+                        }else{
+                            it
+                        }
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally,
-                state = lazyState
+                state = lazyState,
+                userScrollEnabled = state.isZoomEnable
             ) {
                 items(pdf.pageCount) {
                     val pageContent = pdf.pageLists[it].stateFlow.collectAsState().value
